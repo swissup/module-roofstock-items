@@ -1,6 +1,6 @@
-# Remove Our-Od-Stock Items
+# Remove Out-Of-Stock Items
 
-The customer's carts can have some abandoned items that has an updated stock status from In Stock to Out-Of-Stock.
+The customer's carts can have some abandoned items that have an updated stock status from In Stock to Out-Of-Stock.
 This magento 2 module lets you remove them automatically, from the customer's cart quotes.
 They will be removed at once as the customers will log in to their account.
 
