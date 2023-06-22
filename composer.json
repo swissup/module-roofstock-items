@@ -1,0 +1,17 @@
+{
+    "name": "swissup/module-roofstock-items",
+    "description": "Remove Out-of-Stock items from the customer's cart quotes.",
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "license": [
+        "OSL-3.0"
+    ],
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Swissup\\RoofstockItems\\": ""
+        }
+    }
+}
