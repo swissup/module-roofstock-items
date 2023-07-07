@@ -4,7 +4,6 @@ namespace Swissup\RoofstockItems\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Checkout\Model\Session as CheckoutSession;
-use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface as StockRegistry;
@@ -22,11 +21,6 @@ class RemoveOutOfStockItems implements ObserverInterface
      *  @var \Magento\Checkout\Model\Session
      */
     protected $checkoutSession;
-
-    /**
-     *  @var \Magento\Customer\Model\Session
-     */
-    protected $customerSession
 
     /**
      *  @var \Magento\Quote\Model\Quote\Item
@@ -70,7 +64,6 @@ class RemoveOutOfStockItems implements ObserverInterface
      */
     public function __construct(
         CheckoutSession $checkoutSession,
-        CustomerSession $customerSession,
         QuoteItem $quoteItem,
         ManagerInterface $messageManager,
         Data $helper,
@@ -79,7 +72,6 @@ class RemoveOutOfStockItems implements ObserverInterface
         StoreManagerInterface $storeManager
     ) {
         $this->checkoutSession  = $checkoutSession;
-        $this->customerSession  = $customerSession;
         $this->quoteItem        = $quoteItem;
         $this->messageManager   = $messageManager;
         $this->helper           = $helper;
@@ -93,10 +85,6 @@ class RemoveOutOfStockItems implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        if (!$this->customerSession->isLoggedIn()) {
-            return $this;
-        }
-
         $quote = $this->checkoutSession->getQuote();
         $items = $quote->getAllVisibleItems();
 
