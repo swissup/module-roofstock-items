@@ -5,6 +5,7 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
+use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface as StockRegistry;
 use Magento\InventorySalesApi\Api\Data\SalesChannelInterface;
@@ -26,6 +27,11 @@ class RemoveOutOfStockItems implements ObserverInterface
      *  @var \Magento\Quote\Model\Quote\Item
      */
     protected $quoteItem;
+
+    /**
+     * @var \Magento\Quote\Api\CartRepositoryInterface
+     */
+    protected $quoteRepository;
 
     /**
      *  @var \Psr\Log\LoggerInterface
@@ -65,6 +71,7 @@ class RemoveOutOfStockItems implements ObserverInterface
     public function __construct(
         CheckoutSession $checkoutSession,
         QuoteItem $quoteItem,
+        CartRepositoryInterface $quoteRepository,
         ManagerInterface $messageManager,
         Data $helper,
         Logger $logger,
@@ -73,6 +80,7 @@ class RemoveOutOfStockItems implements ObserverInterface
     ) {
         $this->checkoutSession  = $checkoutSession;
         $this->quoteItem        = $quoteItem;
+        $this->quoteRepository  = $quoteRepository;
         $this->messageManager   = $messageManager;
         $this->helper           = $helper;
         $this->logger           = $logger;
@@ -94,7 +102,7 @@ class RemoveOutOfStockItems implements ObserverInterface
                     $item->getProduct()->getTypeId() === 'grouped'
                 ) {
                     if (!$this->getStockStatus($item)) {
-                        $this->removeProduct($item);
+                        $this->removeProduct($item, $quote);
                     }
 
                 } else {
@@ -103,7 +111,7 @@ class RemoveOutOfStockItems implements ObserverInterface
                     $stockStatus = $stockItem->getIsInStock();
 
                     if (!$stockStatus) {
-                        $this->removeProduct($item);
+                        $this->removeProduct($item, $quote);
                     }
                 }
             } catch (Exception $e) {
@@ -144,14 +152,18 @@ class RemoveOutOfStockItems implements ObserverInterface
      * remove Out-Of-Stock products from customer quote
      *
      * @param {Object} $product
+     * @param {Object} $quote
      * @return void
      */
-    protected function removeProduct($product)
+    protected function removeProduct($product, $quote)
     {
         $quoteItem = $this->quoteItem->load($product->getId());
         $quoteItem->delete();
 
         $message = __("The Out-Of-Stock product with SKU-" . $product->getSku() . " was removed from your cart.");
         $this->messageManager->addNotice($message);
+
+        /* update quote repository */
+        $this->quoteRepository->save($quote);
     }
 }
