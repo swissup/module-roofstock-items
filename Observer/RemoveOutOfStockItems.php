@@ -3,12 +3,14 @@ namespace Swissup\RoofstockItems\Observer;
 
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Framework\Message\ManagerInterface;
 use Psr\Log\LoggerInterface as Logger;
 use Swissup\RoofstockItems\Model\StockStatus as ProductStockStatus;
+use Swissup\RoofstockItems\Helper\Email as HelperEmail;
 
 class RemoveOutOfStockItems implements ObserverInterface
 {
@@ -38,12 +40,23 @@ class RemoveOutOfStockItems implements ObserverInterface
     protected $messageManager;
 
     /**
+     * @var  \Swissup\RoofstockItems\Model\StockStatus
+     */
+    protected $productStockStatus;
+
+    /**
+     *  @var \Swissup\RoofstockItems\Helper\Email
+     */
+    protected $helper;
+
+    /**
      * @param   CheckoutSession $checkoutSession
      * @param   QuoteItem $quoteItem
      * @param   CartRepositoryInterface $quoteRepository
      * @param   ManagerInterface $messageManager
      * @param   ProductStockStatus $productStockStatus
      * @param   Logger $logger
+     * @param   HelperEmail $helper
      */
     public function __construct(
         CheckoutSession $checkoutSession,
@@ -51,7 +64,8 @@ class RemoveOutOfStockItems implements ObserverInterface
         CartRepositoryInterface $quoteRepository,
         ManagerInterface $messageManager,
         ProductStockStatus $productStockStatus,
-        Logger $logger
+        Logger $logger,
+        HelperEmail $helper
     ) {
         $this->checkoutSession      = $checkoutSession;
         $this->quoteItem            = $quoteItem;
@@ -59,6 +73,7 @@ class RemoveOutOfStockItems implements ObserverInterface
         $this->messageManager       = $messageManager;
         $this->productStockStatus   = $productStockStatus;
         $this->logger               = $logger;
+        $this->helper               = $helper;
     }
 
     /**
@@ -68,6 +83,7 @@ class RemoveOutOfStockItems implements ObserverInterface
     {
         $quote = $this->checkoutSession->getQuote();
         $items = $quote->getAllVisibleItems();
+        $outOfStockItems = [];
 
         foreach ($items as $item) {
             try {
@@ -76,6 +92,7 @@ class RemoveOutOfStockItems implements ObserverInterface
                 ) {
                     if (!$this->productStockStatus->getStockStatus($item)) {
                         $this->removeProduct($item);
+                        $outOfStockItems[] = $item->getSku();
                     }
 
                 } else {
@@ -85,11 +102,18 @@ class RemoveOutOfStockItems implements ObserverInterface
 
                     if (!$stockStatus) {
                         $this->removeProduct($item);
+                        $outOfStockItems[] = $item->getSku();
                     }
                 }
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->logger->error($e->getMessage());
             }
+        }
+
+        $storeId = $this->productStockStatus->getStoreId();
+        /* send email notification with products SKUs*/
+        if ($outOfStockItems) {
+            $this->helper->sendEmail($outOfStockItems, $storeId);
         }
 
         /* update quote repository */

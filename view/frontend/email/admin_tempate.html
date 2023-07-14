@@ -1,0 +1,7 @@
+{{template config_path="design/email/header_template"}}
+
+<p class="greeting">{{trans "Hi,"}}</p>
+<p>{{trans 'The product(s) with the next SKU(s) become out-of-stock: %num_sku .' num_sku=$num_sku | raw}}</p>
+<p>{{trans "Best Regards,"}}</p>
+
+{{template config_path="design/email/footer_template"}}

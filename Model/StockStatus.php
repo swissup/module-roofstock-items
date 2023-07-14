@@ -13,6 +13,11 @@ use Magento\Store\Model\StoreManagerInterface;
 class StockStatus extends \Magento\Framework\Model\AbstractModel
 {
     /**
+     * @var integer
+     */
+    protected $storeId = 0;
+
+    /**
      *  @var \Magento\Backend\Helper\Data
      */
     protected $helper;
@@ -67,5 +72,27 @@ class StockStatus extends \Magento\Framework\Model\AbstractModel
         } else {
             // code...
         }
+    }
+
+    /**
+     * Sets the store identifier.
+     *
+     * @param Integer $toreId
+     * @return $this
+     */
+    public function setStoreId($storeId)
+    {
+        $this->setStoreId = $storeId;
+        return $this;
+    }
+
+    /**
+     * Gets the store identifier.
+     *
+     * @return Integer
+     */
+    public function getStoreId()
+    {
+        return $this->storeId;
     }
 }
