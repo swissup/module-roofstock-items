@@ -51,7 +51,7 @@ class StockStatus extends \Magento\Framework\Model\AbstractModel
      * @param {Object} $product
      * @return {Boolean}
      */
-    protected function getStockStatus($product)
+    public function getStockStatus($product)
     {
         $objectManager = ObjectManager::getInstance();
         $websiteCode = $this->storeManager->getWebsite()->getCode();
@@ -77,12 +77,12 @@ class StockStatus extends \Magento\Framework\Model\AbstractModel
     /**
      * Sets the store identifier.
      *
-     * @param Integer $toreId
+     * @param Integer $storeId
      * @return $this
      */
     public function setStoreId($storeId)
     {
-        $this->setStoreId = $storeId;
+        $this->storeId = $storeId;
         return $this;
     }
 

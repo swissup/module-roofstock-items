@@ -8,6 +8,7 @@ use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Quote\Model\Quote\Item as QuoteItem;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface as Logger;
 use Swissup\RoofstockItems\Model\StockStatus as ProductStockStatus;
 use Swissup\RoofstockItems\Helper\Email as HelperEmail;
@@ -28,6 +29,11 @@ class RemoveOutOfStockItems implements ObserverInterface
      * @var \Magento\Quote\Api\CartRepositoryInterface
      */
     protected $quoteRepository;
+
+    /**
+     * @var \Magento\Quote\Api\CartRepositoryInterface
+     */
+    protected $storeManager;
 
     /**
      *  @var \Psr\Log\LoggerInterface
@@ -55,6 +61,7 @@ class RemoveOutOfStockItems implements ObserverInterface
      * @param   CartRepositoryInterface $quoteRepository
      * @param   ManagerInterface $messageManager
      * @param   ProductStockStatus $productStockStatus
+     * @param   StoreManagerInterface $storeManager
      * @param   Logger $logger
      * @param   HelperEmail $helper
      */
@@ -64,6 +71,7 @@ class RemoveOutOfStockItems implements ObserverInterface
         CartRepositoryInterface $quoteRepository,
         ManagerInterface $messageManager,
         ProductStockStatus $productStockStatus,
+        StoreManagerInterface $storeManager,
         Logger $logger,
         HelperEmail $helper
     ) {
@@ -72,6 +80,7 @@ class RemoveOutOfStockItems implements ObserverInterface
         $this->quoteRepository      = $quoteRepository;
         $this->messageManager       = $messageManager;
         $this->productStockStatus   = $productStockStatus;
+        $this->storeManager         = $storeManager;
         $this->logger               = $logger;
         $this->helper               = $helper;
     }
@@ -132,6 +141,7 @@ class RemoveOutOfStockItems implements ObserverInterface
     {
         $quoteItem = $this->quoteItem->load($product->getId());
         $quoteItem->delete();
+        $this->productStockStatus->setStoreId($this->storeManager->getStore()->getId());
 
         $message = __("The Out-Of-Stock product with SKU-" . $product->getSku() . " was removed from your cart.");
         $this->messageManager->addNotice($message);

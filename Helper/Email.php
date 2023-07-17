@@ -7,6 +7,7 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Framework\Mail\Template\TransportBuilder;
+use Psr\Log\LoggerInterface as Logger;
 
 class Email extends AbstractHelper
 {
@@ -25,16 +26,24 @@ class Email extends AbstractHelper
     protected $transportBuilder;
 
     /**
+     * @var Psr\Log\LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * Constructor
      *
      * @param Context $context
      * @param TransportBuilder $transportBuilder
+     * @param Logger $logger
      */
     public function __construct(
         Context $context,
-        TransportBuilder $transportBuilder
+        TransportBuilder $transportBuilder,
+        Logger $logger
     ){
         $this->transportBuilder = $transportBuilder;
+        $this->logger = $logger;
         parent::__construct($context);
     }
     
