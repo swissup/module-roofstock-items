@@ -90,6 +90,10 @@ class RemoveOutOfStockItems implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
+        if (!$this->helper->isEnabled()) {
+            return;
+        }
+
         $quote = $this->checkoutSession->getQuote();
         $items = $quote->getAllVisibleItems();
         $outOfStockItems = [];

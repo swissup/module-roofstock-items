@@ -1,12 +1,12 @@
-<script>
-    require([
-        'jquery',
-        'Swissup_RoofstockItems/js/update-qty'
-    ], function ($, updateQty) {
-        'use strict';
+<?php
+/* Swissup\RoofstockItems\Block\Customer\Block */
 
-        $(function () {
-            updateQty();
-        });
-    });
+ if (!$block->getIsEnabled()) return;
+?>
+<script type="text/x-magento-init">
+    {
+        "*": {
+            "Swissup_RoofstockItems/js/update-qty": {}
+        }
+    }
 </script>
